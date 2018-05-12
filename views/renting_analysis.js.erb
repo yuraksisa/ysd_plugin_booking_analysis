@@ -1,0 +1,87 @@
+require(['jquery', 'YSDForms', 'jquery.ui', 'jquery.ui.datepicker-es','datejs'], function($, YSDForms) {
+
+    model = {
+
+    };
+
+    controller = {
+
+    };
+
+    view = {
+
+        init: function() {
+            YSDForms.improve();
+            this.setupControls();
+        },
+
+        setupControls: function() {
+            var locale = $.datepicker.regional["<%=session[:locale] || 'es'%>"];
+            $.datepicker.setDefaults($.datepicker.regional["<%=session[:locale] || 'es'%>"]);
+            $('#received_from').datepicker(
+                {controlType: 'select',
+                    showTimezone: false,
+                    useLocalTimezone: true,
+                    numberOfMonths:1,
+                    dateFormat: 'dd/mm/yy'
+                },
+                locale
+            );
+            <% if defined?(@received_from) %>
+            $('#received_from').datepicker('setDate', new Date('<%=@received_from.strftime('%Y-%m-%d')%>'));
+            <% else %>
+            $('#received_from').datepicker('setDate', new Date());
+            <% end %>
+            $('#received_to').datepicker(
+                {controlType: 'select',
+                    showTimezone: false,
+                    useLocalTimezone: true,
+                    numberOfMonths:1,
+                    dateFormat: 'dd/mm/yy'
+                },
+                locale
+            );
+            <% if defined?(@received_to) %>
+            $('#received_to').datepicker('setDate', new Date('<%=@received_to.strftime('%Y-%m-%d')%>'));
+            <% else %>
+            $('#received_to').datepicker('setDate', new Date());
+            <% end %>
+            $('#reservation_start_from').datepicker(
+                {controlType: 'select',
+                    showTimezone: false,
+                    useLocalTimezone: true,
+                    numberOfMonths:1,
+                    dateFormat: 'dd/mm/yy'
+                },
+                locale
+            );
+            <% if defined?(@reservation_start_from) %>
+            $('#reservation_start_from').datepicker('setDate', new Date('<%=@reservation_start_from.strftime('%Y-%m-%d')%>'));
+            <% else %>
+            $('#reservation_start_from').datepicker('setDate', new Date());
+            <% end %>
+            $('#reservation_start_to').datepicker(
+                {controlType: 'select',
+                    showTimezone: false,
+                    useLocalTimezone: true,
+                    numberOfMonths:1,
+                    dateFormat: 'dd/mm/yy'
+                },
+                locale
+            );
+            <% if defined?(@reservation_start_to) %>
+            $('#reservation_start_to').datepicker('setDate', new Date('<%=@reservation_start_to.strftime('%Y-%m-%d')%>'));
+            <% else %>
+            $('#reservation_start_to').datepicker('setDate', new Date());
+            <% end %>
+        }
+
+
+    };
+
+    $(document).ready(function() {
+
+        view.init();
+
+    });
+});

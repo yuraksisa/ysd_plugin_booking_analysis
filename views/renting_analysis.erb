@@ -1,0 +1,200 @@
+<div class="top-navigation-bar">
+  <h2 class="entity-title"><%=t.booking_renting_analysis.title%></h2>
+</div>
+<div class="admin_content_wrapper"  style="background-color: #f5f5f5; margin: 0">
+
+  <div id="content">
+
+    <br>
+
+      <div class="row">
+        <div class="col-sm-12 col-md-10 col-md-offset-1">
+          <div class="block ">
+            <div class="block-header bg-gray-lighter">
+              <h3 class="block-title"><%=t.booking_renting_analysis.renting_for_period_summary%></h3>
+            </div>
+            <div class="block-content block-content-narrow">
+              <form name="variables" action="/admin/booking/analysis/renting" method="POST" class="form-horizontal">
+                <div class="form-group">
+                  <label class="col-xs-10" for="received_from">Recibida desde</label>
+                  <div class="col-xs-10">
+                    <input class="form-control date_control" type="text" id="received_from" name="received_from" placeholder="Introduzca fecha recibida desde">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-xs-10" for="received_to">Recibida hasta</label>
+                  <div class="col-xs-10">
+                    <input class="form-control date_control" type="text" id="received_to" name="received_to" placeholder="Introduzca fecha recibida hasta">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-xs-10" for="reservation_start_from">Fecha reserva desde</label>
+                  <div class="col-xs-10">
+                    <input class="form-control date_control" type="text" id="reservation_start_from" name="reservation_start_from" placeholder="Introduzca fecha reserva desde">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-xs-10" for="reservation_start_to">Fecha reserva hasta</label>
+                  <div class="col-xs-10">
+                    <input class="form-control date_control" type="text" id="reservation_start_to" name="reservation_start_to" placeholder="Introduzca fecha reserva hasta">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="col-xs-12">
+                    <button class="button btn btn-sm btn-primary pull-right" type="submit"><i class="fa fa-save push-5-r"></i> <%=t.entitymanagement.search%></button>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <% if request.post? %>
+    <div class="content content-narrow">
+      <div class="row">
+        <div class="col-sm-6 col-lg-3">
+          <a class="block block-bordered block-link-hover3 text-center" href="javascript:void(0)">
+            <div class="block-content block-content-full bg-gray-lighter border-b">
+              <div class="h1 font-w700"> <%=@result.total.to_i %></div>
+              <div class="h5 text-muted text-uppercase push-5-t">Total Reservas</div>
+            </div>
+            <div class="block-content block-content-full block-content-mini">
+              <% if @result.total > @result_previous_year.total %>
+                <i class="fa fa-arrow-up text-success"></i> +<%=((@result.total - @result_previous_year.total).to_f / @result_previous_year.total * 100).round%>% año pasado (<%= @result_previous_year.total %>)
+              <% elsif @result.total < @result_previous_year.total %>
+                <i class="fa fa-arrow-down text-danger"></i> <%=((@result.total - @result_previous_year.total).to_f / @result_previous_year.total * 100).round%>% este año (<%= @result_previous_year.total %>)
+              <% else %>
+                igual que el año pasado
+              <% end %>
+            </div>
+          </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <a class="block block-bordered block-link-hover3 text-center" href="javascript:void(0)">
+            <div class="block-content block-content-full bg-gray-lighter border-b">
+              <div class="h1 font-w700"><%=@result.total_cost %> <span class="h2 text-muted">€</span></div>
+              <div class="h5 text-muted text-uppercase push-5-t">Total Facturado</div>
+            </div>
+            <div class="block-content block-content-full block-content-mini">
+              <% if @result.total_cost > @result_previous_year.total_cost %>
+                <i class="fa fa-arrow-up text-success"></i> +<%=((@result.total_cost - @result_previous_year.total_cost).to_f / @result_previous_year.total_cost * 100).round%>% año pasado (<%= @result_previous_year.total_cost %>€)
+              <% elsif @result.total_cost < @result_previous_year.total_cost%>
+                <i class="fa fa-arrow-down text-danger"></i> <%=((@result.total_cost - @result_previous_year.total_cost).to_f / @result_previous_year.total_cost * 100).round%>% este año (<%= @result_previous_year.total_cost %>€)
+              <% else %>
+                igual que el año pasado
+              <% end %>
+            </div>
+          </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <a class="block block-bordered block-link-hover3 text-center" href="javascript:void(0)">
+            <div class="block-content block-content-full bg-gray-lighter border-b">
+              <div class="h1 font-w700"> <%=@result.avg_days.to_i %></div>
+              <div class="h5 text-muted text-uppercase push-5-t">Días promedio</div>
+            </div>
+            <div class="block-content block-content-full block-content-mini">
+              <% if @result.avg_days > @result_previous_year.avg_days %>
+              <i class="fa fa-arrow-up text-success"></i> +<%=((@result.avg_days - @result_previous_year.avg_days).to_f / @result_previous_year.avg_days * 100).round%>% año pasado (<%= @result_previous_year.avg_days %>)
+              <% elsif @result.avg_days < @result_previous_year.avg_days %>
+              <i class="fa fa-arrow-down text-danger"></i> <%=((@result.avg_days - @result_previous_year.avg_days).to_f / @result_previous_year.avg_days * 100).round%>% este año (<%= @result_previous_year.avg_days %>)
+              <% else %>
+                igual que el año pasado
+              <% end %>
+            </div>
+          </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <a class="block block-bordered block-link-hover3 text-center" href="javascript:void(0)">
+            <div class="block-content block-content-full bg-gray-lighter border-b">
+              <div class="h1 font-w700"><%=@result.avg_total_cost %> <span class="h2 text-muted">€</span></div>
+              <div class="h5 text-muted text-uppercase push-5-t">Facturación promedio reserva</div>
+            </div>
+            <div class="block-content block-content-full block-content-mini">
+              <% if @result.avg_total_cost > @result_previous_year.avg_total_cost %>
+                <i class="fa fa-arrow-up text-success"></i> +<%=((@result.avg_total_cost - @result_previous_year.avg_total_cost).to_f / @result_previous_year.avg_total_cost * 100).round%>% año pasado (<%= @result_previous_year.avg_total_cost %>€)
+              <% elsif  @result.avg_total_cost < @result_previous_year.avg_total_cost%>
+                <i class="fa fa-arrow-down text-danger"></i> <%=((@result.avg_total_cost - @result_previous_year.avg_total_cost).to_f / @result_previous_year.avg_total_cost * 100).round%>% este año (<%= @result_previous_year.avg_total_cost %>€)
+              <% else %>
+                igual que el año pasado
+              <% end %>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6 col-lg-3">
+          <a class="block block-bordered block-link-hover3 text-center" href="javascript:void(0)">
+            <div class="block-content block-content-full bg-gray-lighter border-b">
+              <div class="h1 font-w700"> <%=@result.min_days.to_i %></div>
+              <div class="h5 text-muted text-uppercase push-5-t">Reserva mínimo nº de días</div>
+            </div>
+            <div class="block-content block-content-full block-content-mini">
+              <% if @result.min_days > @result_previous_year.min_days %>
+                <i class="fa fa-arrow-up text-success"></i> +<%=((@result.min_days - @result_previous_year.min_days).to_f / @result_previous_year.min_days * 100).round%>% año pasado (<%= @result_previous_year.min_days %>)
+              <% elsif @result.min_days < @result_previous_year.min_days %>
+                <i class="fa fa-arrow-down text-danger"></i> <%=((@result.min_days - @result_previous_year.min_days).to_f / @result_previous_year.min_days * 100).round%>% este año (<%= @result_previous_year.min_days %>)
+              <% else %>
+                igual que el año pasado
+              <% end %>
+            </div>
+          </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <a class="block block-bordered block-link-hover3 text-center" href="javascript:void(0)">
+            <div class="block-content block-content-full bg-gray-lighter border-b">
+              <div class="h1 font-w700"><%=@result.min_total_cost %> <span class="h2 text-muted">€</span></div>
+              <div class="h5 text-muted text-uppercase push-5-t">Reserva más económica</div>
+            </div>
+            <div class="block-content block-content-full block-content-mini">
+              <% if @result.min_total_cost > @result_previous_year.min_total_cost %>
+                <i class="fa fa-arrow-up text-success"></i> +<%=((@result.min_total_cost - @result_previous_year.min_total_cost).to_f / @result_previous_year.min_total_cost * 100).round%>% año pasado (<%= @result_previous_year.min_total_cost %>€)
+              <% elsif @result.min_total_cost < @result_previous_year.min_total_cost%>
+                <i class="fa fa-arrow-down text-danger"></i> <%=((@result.min_total_cost - @result_previous_year.min_total_cost).to_f / @result_previous_year.min_total_cost * 100).round%>% este año (<%= @result_previous_year.min_total_cost %>€)
+              <% else %>
+                igual que el año pasado
+              <% end %>
+            </div>
+          </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <a class="block block-bordered block-link-hover3 text-center" href="javascript:void(0)">
+            <div class="block-content block-content-full bg-gray-lighter border-b">
+              <div class="h1 font-w700"> <%=@result.max_days.to_i %></div>
+              <div class="h5 text-muted text-uppercase push-5-t">Reserva máximo nº de días</div>
+            </div>
+            <div class="block-content block-content-full block-content-mini">
+              <% if @result.max_days > @result_previous_year.max_days %>
+                <i class="fa fa-arrow-up text-success"></i> +<%=((@result.max_days - @result_previous_year.max_days).to_f / @result_previous_year.max_days * 100).round%>% año pasado (<%= @result_previous_year.max_days %>)
+              <% elsif @result.max_days < @result_previous_year.max_days %>
+                <i class="fa fa-arrow-down text-danger"></i> <%=((@result.max_days - @result_previous_year.max_days).to_f / @result_previous_year.max_days * 100).round%>% este año (<%= @result_previous_year.max_days %>)
+              <% else %>
+                igual que el año pasado
+              <% end %>
+            </div>
+          </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <a class="block block-bordered block-link-hover3 text-center" href="javascript:void(0)">
+            <div class="block-content block-content-full bg-gray-lighter border-b">
+              <div class="h1 font-w700"><%=@result.max_total_cost %> <span class="h2 text-muted">€</span></div>
+              <div class="h5 text-muted text-uppercase push-5-t">Reserva más cara</div>
+            </div>
+            <div class="block-content block-content-full block-content-mini">
+              <% if @result.max_total_cost > @result_previous_year.max_total_cost %>
+                <i class="fa fa-arrow-up text-success"></i> +<%=((@result.max_total_cost - @result_previous_year.max_total_cost).to_f / @result_previous_year.max_total_cost * 100).round%>% año pasado (<%= @result_previous_year.max_total_cost %>€)
+              <% elsif @result.max_total_cost < @result_previous_year.max_total_cost%>
+                <i class="fa fa-arrow-down text-danger"></i> <%=((@result.max_total_cost - @result_previous_year.max_total_cost).to_f / @result_previous_year.max_total_cost * 100).round%>% este año (<%= @result_previous_year.max_total_cost %>€)
+              <% else %>
+                igual que el año pasado
+              <% end %>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <% end %>
+
+  </div>
+</div>
