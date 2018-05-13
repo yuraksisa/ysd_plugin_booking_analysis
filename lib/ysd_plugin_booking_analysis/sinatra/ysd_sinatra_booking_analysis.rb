@@ -24,10 +24,10 @@ module Sinatra
                                                                                @reservation_start_from,
                                                                                @reservation_start_to)
 
-            @result_previous_year = BookingDataSystem::Booking.booking_received_reservations(@received_from<<(1),
-                                                                                             @received_to<<(1),
-                                                                                             @reservation_start_from<<(1),
-                                                                                             @reservation_start_to<<(1))
+            @result_previous_year = BookingDataSystem::Booking.booking_received_reservations(@received_from<<(12),
+                                                                                             @received_to<<(12),
+                                                                                             @reservation_start_from<<(12),
+                                                                                             @reservation_start_to<<(12))
           end
 
           load_page (:renting_analysis)
