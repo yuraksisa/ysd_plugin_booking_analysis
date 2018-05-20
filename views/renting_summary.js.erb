@@ -1,0 +1,57 @@
+require(['jquery', 'YSDForms', 'charts', 'jquery.flot', 'jquery.flot.time', 'jquery.ui', 'datejs'], function($, YSDForms, Chart) {
+
+    model = {
+
+        cummulativeReservation: [
+         { label: '2018', data: [<% d=0; @cummulative_reservation_data.each do |k,v| %>[new Date('2018-<%=k%>').getTime(),<%=v%>],<%d=d+1%><%end%>], shadowSize: 0},
+         { label: '2017', data: [<% d=0; @cummulative_reservation_data_previous.each do |k,v| %>[new Date('2018-<%=k%>').getTime(),<%=v%>],<%d=d+1%><%end%>], shadowSize: 0},
+         {label: '2016', data:  [<% d=0; @cummulative_reservation_data_before_previous.each do |k,v| %>[new Date('2018-<%=k%>').getTime(),<%=v%>],<%d=d+1%><%end%>], shadowSize: 0}
+        ]
+    };
+
+    controller = {};
+
+    view = {
+        init: function () {
+
+            this.buildCummulativePlot();
+
+        },
+
+        buildCummulativePlot: function() {
+            var options = {
+                series: {
+                    lines: {
+                        show: true
+                    }
+                },
+                xaxis: {
+                    mode: "time",
+                    tickSize: [1, "month"],
+                    tickLength: 0,
+                    axisLabelUseCanvas: true
+                },
+                yaxis:{
+                    axisLabelUseCanvas: true,
+                    axisLabelPadding: 3
+                },
+                legend: {
+                    noColumns: 0,
+                    labelBoxBorderColor: "#000000",
+                    position: "nw"
+                },
+                grid: {
+                    hoverable: true,
+                    borderWidth: 1,
+                    borderColor: "#dddddd",
+                    backgroundColor: "#ffffff"
+                },
+                colors: ["#336b44", "#60ae5c", "#EEEEEE"] // Lines colors
+            };
+
+            $.plot("#cummulative_received_reservations_graphic",  model.cummulativeReservation, options);
+        }
+    }
+
+    view.init();
+});
