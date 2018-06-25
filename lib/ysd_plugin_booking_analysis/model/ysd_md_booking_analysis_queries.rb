@@ -11,10 +11,14 @@ module YsdPluginBookingAnalysis
                                       reservation_start_from, reservation_start_to)
 
       query = <<-QUERY
-         select count(*) as total, sum(total_cost) as total_cost,
-                round(avg(days)) as avg_days, round(avg(total_cost)) as avg_total_cost,
-                round(min(days)) as min_days, round(min(total_cost)) as min_total_cost,
-                round(max(days)) as max_days, round(max(total_cost)) as max_total_cost 
+         select count(*) as total,
+                sum(total_cost) as total_cost,
+                round(avg(days)) as avg_days, 
+                round(avg(total_cost)) as avg_total_cost,
+                round(min(days)) as min_days, 
+                round(min(total_cost)) as min_total_cost,
+                round(max(days)) as max_days, 
+                round(max(total_cost)) as max_total_cost 
          from bookds_bookings as b
          where b.creation_date >= ? and b.creation_date <= ? and 
                b.date_from >= ? and b.date_from <= ? and
@@ -22,6 +26,17 @@ module YsdPluginBookingAnalysis
       QUERY
 
       data = repository.adapter.select(query, received_from, received_to, reservation_start_from, reservation_start_to).first
+
+      data.total = 0 if data.total.nil?
+      data.total_cost = 0 if data.total_cost.nil?
+      data.avg_days = 0 if data.avg_days.nil?
+      data.avg_total_cost = 0 if data.avg_total_cost.nil?
+      data.min_days = 0 if data.min_days.nil?
+      data.min_total_cost = 0 if data.min_total_cost.nil?
+      data.max_days = 0 if data.max_days.nil?
+      data.max_total_cost = 0 if data.max_total_cost.nil?
+
+      return data
 
     end
 
@@ -46,10 +61,17 @@ module YsdPluginBookingAnalysis
 
       # Fill the non cummulative date
       keys = query_data.keys.sort
-      keys.each_index { |index| query_data[keys[index]] = query_data[keys[index-1]] if query_data[keys[index]] == 0 and index > 0 }
+      keys.each_index do |index|
+        query_data[keys[index]] = query_data[keys[index-1]] if query_data[keys[index]] == 0 and index > 0
+      end
 
       # Build the sort data
-      result = query_data.keys.sort.inject({}) {|result, item| date=Date.strptime(item,'%Y-%m-%d'); key="#{date.month.to_s.rjust(2,'0')}-#{date.day.to_s.rjust(2,'0')}"; result.store(key, query_data[item]); result }
+      result = query_data.keys.sort.inject({}) do |result, item|
+         date=Date.strptime(item,'%Y-%m-%d')
+         key="#{date.month.to_s.rjust(2,'0')}-#{date.day.to_s.rjust(2,'0')}"
+         result.store(key, query_data[item] || 0)
+         result
+      end
 
       p "result:#{result}"
 

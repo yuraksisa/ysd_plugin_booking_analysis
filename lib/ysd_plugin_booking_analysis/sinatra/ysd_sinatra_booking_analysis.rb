@@ -48,6 +48,9 @@ module Sinatra
                                                                                              @received_to<<(12),
                                                                                              @reservation_start_from<<(12),
                                                                                              @reservation_start_to<<(12))
+            p "result: #{@result.inspect} previous: #{@result_previous_year.inspect}"
+
+
           end
 
           load_page (:renting_analysis)
