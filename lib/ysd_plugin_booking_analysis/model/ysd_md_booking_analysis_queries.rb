@@ -2,6 +2,49 @@ require 'ysd_md_booking' unless defined?(BookingDataSystem::Booking)
 
 module YsdPluginBookingAnalysis
   module BookingAnalysisQueries
+
+    #
+    # Reservations received in a year grouped by received month
+    #
+    def reservations_received_by_creation_date(year)
+      analysis_query_strategy.reservations_received_by_creation_date(year)
+    end
+
+    #
+    # Confirmed reservations in a year grouped by received month
+    #
+    def reservations_confirmed_by_creation_date(year)
+      analysis_query_strategy.reservations_confirmed_by_creation_date(year)
+    end
+
+    #
+    # Confirmed reservations in a year grouped by received month
+    #
+    def reservations_confirmed_by_reservation_date(year)
+      analysis_query_strategy.reservations_confirmed_by_reservation_date(year)
+    end
+
+    #
+    # Yearly invoicing group by month
+    #
+    def incoming_money_summary(year)
+      analysis_query_strategy.incoming_money_summary(year)
+    end
+
+    #
+    # Yearly invoicing group by month and sales channel
+    #
+    def invoicing_by_sales_channel(year)
+      analysis_query_strategy.invoicing_by_sales_channel(year)
+    end
+
+    #
+    # Yearly invoicing group by category
+    #
+    def invoicing_by_product_category(year)
+      analysis_query_strategy.invoicing_by_product_category(year)
+    end
+
     #
     # Get a summary of reservation received between received_from and
     # received_to dates that correspond a reservations which start

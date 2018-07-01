@@ -8,5 +8,6 @@ Plugins::SinatraAppPlugin.register :booking_analysis do
   version=     '0.1'
   hooker       YsdPluginBookingAnalysis::BookingAnalysisExtension
   sinatra_extension Sinatra::YitoExtension::BookingAnalysis
+  sinatra_extension Sinatra::YitoExtension::BookingAnalysisRESTApi
 
 end

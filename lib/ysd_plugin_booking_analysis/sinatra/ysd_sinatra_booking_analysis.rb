@@ -9,9 +9,32 @@ module Sinatra
         app.settings.translations = Array(app.settings.translations).push(File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'i18n')))
 
         #
-        # renting booking summary
+        # Monthly - Yearly summary
         #
-        app.route :get, :post, ['/admin/booking/analysis/summary'], :allowed_usergroups => ['booking_manager', 'staff'] do
+        app.get '/admin/booking/analysis/summary', :allowed_usergroups => ['booking_manager', 'staff'] do
+
+          first = BookingDataSystem::Booking.first(order: :creation_date.asc, limit: 1)
+          first_year = first ? first.creation_date.year : Date.today.year
+          current_year = Date.today.year
+
+          # Sales channels
+          addons = mybooking_addons
+          @addon_sales_channels = (addons and addons.has_key?(:addon_sales_channels) and addons[:addon_sales_channels])
+          if @addon_sales_channels
+            @sales_channels_count = ::Yito::Model::SalesChannel::SalesChannel.count + 1
+            @sales_channels = [{code: 'default',fillColor: 'rgba(151,187,205,0.5)',
+                                strokeColor: 'rgba(151,187,205,1)'}].concat(::Yito::Model::SalesChannel::SalesChannel.all.map { |sc| {code: sc.code, fillColor: sc.color,
+                                                                                                           strokeColor: sc.color} })
+            p "sales_channels:#{@sales_channels}"
+          end
+
+          load_page(:booking_analysis_summary, :locals => {first_year: first_year, current_year: current_year})
+        end
+
+        #
+        # Received reservations PLOT
+        #
+        app.route :get, :post, ['/admin/booking/analysis/received-reservations'], :allowed_usergroups => ['booking_manager', 'staff'] do
 
           @today = Date.today
           @from = Date.civil(@today.year, 1, 1)
@@ -25,13 +48,17 @@ module Sinatra
           @cummulative_reservation_data_previous = BookingDataSystem::Booking.booking_cummulative_received_reservations(@previous_year_first_day, @previous_year_last_day)
           @cummulative_reservation_data_before_previous = BookingDataSystem::Booking.booking_cummulative_received_reservations(@before_previous_year_first_day, @before_previous_year_last_day)
 
-          load_page(:renting_summary)
+          first = BookingDataSystem::Booking.first(order: :creation_date.asc, limit: 1)
+          first_year = first ? first.creation_date.year : Date.today.year
+          current_year = Date.today.year
+
+          load_page(:received_reservations, locals: {current_year: current_year, first_year: first_year})
         end
 
         #
-        # Renting analysis
+        # User selected periods analysis
         #
-        app.route :get, :post, ['/admin/booking/analysis/renting'], :allowed_usergroups => ['booking_manager', 'staff'] do
+        app.route :get, :post, ['/admin/booking/analysis/periods'], :allowed_usergroups => ['booking_manager', 'staff'] do
 
           if request.post?
             @received_from = parse_date(params['received_from'], session[:locale])
@@ -48,14 +75,13 @@ module Sinatra
                                                                                              @received_to<<(12),
                                                                                              @reservation_start_from<<(12),
                                                                                              @reservation_start_to<<(12))
-            p "result: #{@result.inspect} previous: #{@result_previous_year.inspect}"
-
 
           end
 
           load_page (:renting_analysis)
 
         end
+
 
       end
     end

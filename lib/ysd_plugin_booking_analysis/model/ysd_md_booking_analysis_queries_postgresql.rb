@@ -5,6 +5,95 @@ module YsdPluginBookingAnalysis
       @repository = repository
     end
 
+    def reservations_received_by_creation_date(year)
+
+      query = <<-QUERY
+             SELECT TO_CHAR(creation_date, 'YYYY-MM') as period, 
+                 count(*) as occurrences
+             FROM bookds_bookings 
+             WHERE date_part('year', creation_date) = #{year.to_i}
+             GROUP BY period
+             order by period
+      QUERY
+
+      reservations=@repository.adapter.select(query)
+
+    end
+
+    def reservations_confirmed_by_creation_date(year)
+
+      query = <<-QUERY
+             SELECT TO_CHAR(creation_date, 'YYYY-MM') as period, 
+                  count(*) as occurrences
+             FROM bookds_bookings
+             WHERE status NOT IN (1,5) and date_part('year', creation_date) = #{year.to_i}
+             GROUP BY period 
+             order by period
+      QUERY
+
+      reservations=@repository.adapter.select(query)
+
+    end
+
+    def reservations_confirmed_by_reservation_date(year)
+
+      query = <<-QUERY
+             SELECT TO_CHAR(date_from, 'YYYY-MM') as period, 
+                  count(*) as occurrences
+             FROM bookds_bookings
+             WHERE status NOT IN (1,5) and date_part('year', date_from) = #{year.to_i}
+             GROUP BY period 
+             order by period
+      QUERY
+
+      reservations=@repository.adapter.select(query)
+
+    end
+
+    def incoming_money_summary(year)
+
+      query = <<-QUERY
+             SELECT TO_CHAR(date_from, 'YYYY-MM') as period, 
+                 sum(total_cost) as total
+             FROM bookds_bookings
+             WHERE status NOT IN (1,5) and date_part('year', date_from) = #{year.to_i}
+             GROUP BY period
+             ORDER by period
+      QUERY
+
+      summary = @repository.adapter.select(query)
+
+    end
+
+    def invoicing_by_sales_channel(year)
+
+      query = <<-QUERY
+             SELECT TO_CHAR(date_from, 'YYYY-MM') as period, sales_channel_code, sum(total_cost) as total
+             FROM bookds_bookings
+             WHERE status NOT IN (1,5) and date_part('year', date_from) = #{year.to_i}
+             GROUP BY period, sales_channel_code
+             ORDER by period, sales_channel_code
+      QUERY
+
+      summary = @repository.adapter.select(query)
+
+    end
+
+    def invoicing_by_product_category(year)
+
+      query = <<-QUERY
+             SELECT bl.item_id, sum(bl.item_cost) as total
+             FROM bookds_bookings as b
+             JOIN bookds_bookings_lines as bl on b.id = bl.booking_id
+             WHERE status NOT IN (1,5) and date_part('year', date_from) = #{year.to_i}
+             GROUP BY item_id
+             ORDER by item_id
+      QUERY
+
+      summary = @repository.adapter.select(query)
+
+    end
+
     #
     #
     #

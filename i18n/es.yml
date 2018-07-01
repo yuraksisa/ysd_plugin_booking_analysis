@@ -1,6 +1,22 @@
 booking_renting_summary:
-  title: Resumen
-  cummulative_received_reservations: Reservas recibidas
+  title: Reservas recibidas
+  cummulative_received_reservations: Comparativa reservas recibidas confirmadas
+  received_reservations_graph_title: Reservas recibidas vs confirmadas
+  received_reservations_table_title: Reservas recibidas vs confirmadas
 booking_renting_analysis:
   title: Análisis
   renting_for_period_summary: Resumen por período
+booking_monthly_yearly_summary:
+  title: Resumen
+  received_reservations_graph_title: Reservas
+  received_reservations_table_title: Reservas
+  invoicing_graph_title: Facturación
+  invoicing_table_title: Facturación
+  invoicing_sales_channel_graph_title: Facturación por canal de venta
+  invoicing_sales_channel_table_title: Facturación por canal de venta
+  invoicing_product_graph_title: Facturación por producto
+  invoicing_product_table_title: Facturación por producto
+  table:
+    period: Mes
+    year: Año
+    product: Producto

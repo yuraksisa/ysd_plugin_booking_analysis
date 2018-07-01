@@ -1,0 +1,174 @@
+require(['jquery','charts','ysdtemplate'], function($, Chart, tmpl) {
+
+
+  invoicingSalesChannelModel = {
+
+     result : null,
+     year: <%=current_year%>,
+     months : {1: 'Ene',
+        2: 'Feb',
+        3: 'Mar',
+        4: 'Abr',
+        5: 'May',
+        6: 'Jun',
+        7: 'Jul',
+        8: 'Ago',
+        9: 'Sep',
+        10: 'Oct',
+        11: 'Nov',
+        12: 'Dic'},
+     sales_channels: {
+     <% idx = 0 %>
+     <% @sales_channels.each do |item| %>
+       <%= idx %> : '<%=item[:code]%>',
+       <% idx += 1 %>
+     <% end %>
+     },
+     sales_channels_count: <%= @sales_channels_count %>,
+     graphData : { labels   : [] ,
+                   datasets : [
+                     <% @sales_channels.each do |item| %>
+                     {
+                           label: '<%item[:code]%>',
+                           backgroundColor : '<%=item[:fillColor]%>',
+                           borderColor : '<%=item[:fillColor]%>',
+                           data : []
+                     },
+                     <% end %>
+                     ]
+                },
+
+     maxValue: function() {
+        var max= 10;
+        for (var property in this.result) {
+
+          for (idx in this.sales_channels) {
+              var total = new Number(this.result[property][this.sales_channels[idx]]);
+              var total_previous_year = new Number(this.result[property][this.sales_channels[idx]+'_previous_year']);
+              if (total > max) {
+                  max = total;
+              }
+              if (total_previous_year > max) {
+                  max = total_previous_year;
+              }
+          }
+
+        }
+        return max;
+     },
+
+     loadData: function(year) {
+
+       var url = '/api/booking/analysis/invoicing-sales-channel';
+       if (year) {
+         url += '?year='+year;
+         this.year = year;
+       }
+
+  	   $.ajax({
+  	   	       type: 'GET',
+  	   	       url : url,
+  	   	       contentType: 'application/json; charset=utf-8',
+  		         dataType : 'json',
+  		         success: function(data, textStatus, jqXHR) {
+                  invoicingSalesChannelModel.result = data;
+                  invoicingSalesChannelModel.graphData.labels = [];
+                  for (idx in invoicingSalesChannelModel.sales_channels) {
+                      invoicingSalesChannelModel.graphData.datasets[idx].data = [];
+                  }
+                  for (item in data) {
+                    invoicingSalesChannelModel.graphData.labels.push(invoicingSalesChannelModel.months[item]);
+                    for (idx in invoicingSalesChannelModel.sales_channels) {
+                      invoicingSalesChannelModel.graphData.datasets[idx].label = invoicingSalesChannelModel.sales_channels[idx];
+                      invoicingSalesChannelModel.graphData.datasets[idx].data.push(new Number(data[item][invoicingSalesChannelModel.sales_channels[idx]]));
+                    }
+                  }
+
+                  invoicingSalesChannelView.update('data_available');
+              }
+          });
+
+     }
+
+  };
+
+  invoicingSalesChannelController = {
+
+  };
+
+  invoicingSalesChannelView = {
+
+     ctx : null,
+     chart: null,
+
+     init : function() {
+     	this.ctx = document.getElementById("invoicing_sales_channel_graphic").getContext("2d");
+     },
+
+     update: function(status) {
+
+        switch(status) {
+            case 'data_available':
+            if (this.chart) {
+             $('#invoicing_sales_channel_graphic').replaceWith('<canvas id="invoicing_sales_channel_graphic" width="640" height="690"></canvas>');
+        	   this.ctx = document.getElementById("invoicing_sales_channel_graphic").getContext("2d");
+            }
+            this.chart = new Chart(this.ctx,{
+                type: 'bar',
+                data: invoicingSalesChannelModel.graphData,
+                options: {
+                    responsive: true,
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                var allData = data.datasets[tooltipItem.datasetIndex].data;
+                                var tooltipLabel = data.labels[tooltipItem.index];
+                                var tooltipData = allData[tooltipItem.index];
+                                var total = 0;
+                                for (var i=0; i<allData.length; i++) {
+                                    total += allData[i];
+                                }
+                                var tooltipPercentage = Math.round((tooltipData / total) * 100);
+                                return tooltipLabel + ': ' + tooltipData + ' (' + tooltipPercentage + '%)';
+                            }
+                        }
+                    },
+                    scales: {
+                        xAxes: [{
+                            stacked: false,
+                            ticks: {
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                min: 0,
+                                max: invoicingSalesChannelModel.maxValue(),
+                                fixedStepSize: Math.ceil(invoicingSalesChannelModel.maxValue() / 20),
+                            }
+                        }]
+                    }
+                }
+            });
+
+
+            var sc = $.extend(true, {}, invoicingSalesChannelModel.sales_channels);
+            sc[invoicingSalesChannelModel.sales_channels_count] ='total';
+
+        	  $("#invoicing_sales_channel_table_container").html(tmpl('booking_invoicing_sales_channel_table', {
+        	      data: invoicingSalesChannelModel.result,
+                months: invoicingSalesChannelModel.months,
+                year: invoicingSalesChannelModel.year,
+                sales_channels: sc}));
+
+        	  break;
+        }
+
+       
+     }
+
+  };
+
+  invoicingSalesChannelView.init();
+  invoicingSalesChannelModel.loadData(<%=current_year%>);
+
+});

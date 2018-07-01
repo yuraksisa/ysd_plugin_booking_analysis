@@ -16,20 +16,46 @@
     font-size: 14px;
     line-height: 1.2em;
   }
+
+  .bar-legend {
+    display: inline-block;
+  }
+  .bar-legend li {
+    list-style-type: none;
+    text-align: left;
+    font-size: 10px;
+    overflow: hidden;
+    display: inline-block;
+  }
+  .bar-legend li span {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-right: 10px;
+    padding: 10px;
+  }
 </style>
 <div class="admin_content_wrapper"  style="background-color: #f5f5f5; margin: 0">
 
-  <div id="content">
+  <div class="content">
+
+    <div class="text-center">
+      <form>
+        <select id="year" name="year">
+        </select>
+      </form>
+    </div>
 
     <br>
 
+    <%= partial(:received_reservations) %>
+
     <div class="row">
-      <div class="col-sm-12 col-md-10 col-md-offset-1">
+      <div class="col-sm-12 col-md-12">
         <div class="block ">
           <div class="block-header bg-gray-lighter">
             <h3 class="block-title"><%=t.booking_renting_summary.cummulative_received_reservations%></h3>
           </div>
-          <div class="block-content block-content-narrow">
+          <div class="block-content">
             <div id="cummulative_received_reservations_container"  class="demo-container">
             <div id="cummulative_received_reservations_graphic" class="demo-placeholder">
 

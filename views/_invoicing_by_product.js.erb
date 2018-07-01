@@ -1,0 +1,145 @@
+require(['jquery','charts','ysdtemplate'], function($, Chart, tmpl) {
+
+
+  invoicingByProductModel = {
+
+     result : null,
+     year: <%=current_year%>,
+     graphData : { labels   : [] ,
+                   datasets : [
+                     {
+                       label: '',
+                       backgroundColor : "rgba(151,187,205,0.5)",
+                       borderColor : "rgba(151,187,205,1)",
+                       borderWidth: 1,
+			                 data : []
+			               },
+                     {
+                       label: '',
+                       backgroundColor : "rgba(220, 220, 220, 0.5)",
+                       borderColor : "rgba(220, 220, 220, 1)",
+                       borderWidth: 1,
+                       data : []
+                     }]
+                },
+
+     maxValue: function() {
+        var max= 10;
+        for (var property in this.result) {
+          var total = new Number(this.result[property].total);
+          var total_previous_year = new Number(this.result[property].total_previous_year);
+          if (total > max) {
+            max = total;
+          }
+          if (total_previous_year > max) {
+              max = total_previous_year;
+          }
+        }
+        return max;
+     },
+
+     loadData: function(year) {
+
+       var url = '/api/booking/analysis/invoicing-products';
+       if (year) {
+         url += '?year='+year;
+         this.year = year;
+       }
+
+  	   $.ajax({
+  	   	       type: 'GET',
+  	   	       url : url,
+  	   	       contentType: 'application/json; charset=utf-8',
+  		         dataType : 'json',
+  		         success: function(data, textStatus, jqXHR) {
+                  invoicingByProductModel.result = data;
+                  invoicingByProductModel.graphData.labels = [];
+                  invoicingByProductModel.graphData.datasets[0].data = [];
+                  invoicingByProductModel.graphData.datasets[1].data = [];
+                  for (item in data) {
+                    invoicingByProductModel.graphData.labels.push(item);
+                    invoicingByProductModel.graphData.datasets[0].label = year;
+                    invoicingByProductModel.graphData.datasets[0].data.push(new Number(data[item].total));
+                    invoicingByProductModel.graphData.datasets[1].label = year - 1;
+                    invoicingByProductModel.graphData.datasets[1].data.push(new Number(data[item].total_previous_year));
+                  }
+                  invoicingByProductView.update('data_available');
+              }
+          });
+
+     }
+
+  };
+
+  invoicingByProductController = {
+
+  };
+
+  invoicingByProductView = {
+
+     ctx : null,
+     chart: null,
+
+     init : function() {
+     	this.ctx = document.getElementById("invoicing_by_product_graphic").getContext("2d");
+     },
+
+     update: function(status) {
+
+        switch(status) {
+        	case 'data_available':
+            if (this.chart) {
+             $('#invoicing_by_product_graphic').replaceWith('<canvas id="invoicing_by_product_graphic" width="640" height="560"></canvas>');
+        	   this.ctx = document.getElementById("invoicing_by_product_graphic").getContext("2d");
+            }
+            this.chart = new Chart(this.ctx, {
+                type: 'bar',
+                data: invoicingByProductModel.graphData,
+                options: {
+                    responsive: true,
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                var allData = data.datasets[tooltipItem.datasetIndex].data;
+                                var tooltipLabel = data.labels[tooltipItem.index];
+                                var tooltipData = allData[tooltipItem.index];
+                                var total = 0;
+                                for (var i=0; i<allData.length; i++) {
+                                    total += allData[i];
+                                }
+                                var tooltipPercentage = Math.round((tooltipData / total) * 100);
+                                return tooltipLabel + ': ' + tooltipData + ' (' + tooltipPercentage + '%)';
+                            }
+                        }
+                    },
+                    scales: {
+                        xAxes: [{
+                            stacked: false,
+                            ticks: {
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                min: 0,
+                                max: invoicingByProductModel.maxValue(),
+                                fixedStepSize: Math.ceil(invoicingByProductModel.maxValue() / 20),
+                            }
+                        }]
+                    }
+                }
+            });
+
+        	  $("#invoicing_by_product_table_container").html(tmpl('invoicing_by_product_table_script', {data: invoicingByProductModel.result,
+                year: invoicingByProductModel.year}));
+        	  break;
+        }
+
+       
+     }
+
+  };
+
+  invoicingByProductView.init();
+  invoicingByProductModel.loadData(<%=current_year%>);
+
+});
